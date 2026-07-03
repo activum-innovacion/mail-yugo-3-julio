@@ -1,0 +1,7 @@
+{
+  "name": "yugo-cartuja-crm-webhook",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Endpoint serverless para marcar leads como 'Acción comercial' en Monday desde el email de Yugo La Cartuja."
+}
