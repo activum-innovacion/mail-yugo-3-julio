@@ -66,9 +66,11 @@ async function setStatus(boardId, itemId, columnId, label) {
 export default async function handler(req, res) {
   const {
     MONDAY_BOARD_ID = "5098228821",
-    MONDAY_STATUS_COLUMN_ID = "status",
-    MONDAY_EMAIL_COLUMN_ID = "email",
-    MONDAY_STATUS_LABEL = "Acción comercial",
+    // IDs reales del tablero "Leads" (verificados vía API).
+    MONDAY_STATUS_COLUMN_ID = "color_mm3qa08v", // "Estado Lead"
+    MONDAY_EMAIL_COLUMN_ID = "email_mm3q9xk", // "E-mail"
+    MONDAY_STATUS_LABEL = "Acción comercial", // ya existe como label en la columna
+
     CLICK_SECRET,
     REDIRECT_URL = "/gracias.html",
   } = process.env;
