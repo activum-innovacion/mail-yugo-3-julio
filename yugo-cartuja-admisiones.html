@@ -58,7 +58,7 @@
           <tr>
             <td style="padding:40px 40px 8px 40px;" class="px">
               <p style="margin:0 0 8px 0;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:#3f2d51;font-weight:bold;">Admisiones universitarias · Curso 25/26</p>
-              <h1 class="h1" style="margin:0 0 20px 0;font-size:32px;line-height:1.2;color:#3f2d51;font-weight:bold;">{{nombre}}, ¿ya sabes si te han aceptado?</h1>
+              <h1 class="h1" style="margin:0 0 20px 0;font-size:32px;line-height:1.2;color:#3f2d51;font-weight:bold;">{pulse.name}, ¿ya sabes si te han aceptado?</h1>
               <p style="margin:0 0 18px 0;font-size:16px;line-height:1.7;color:#3A3247;">
                 Estos días las universidades están publicando las admisiones. En cuanto confirmes tu plaza, el siguiente paso es decidir <strong>dónde vas a vivir este curso</strong>… y las mejores habitaciones se reservan las primeras.
               </p>
@@ -92,8 +92,8 @@
               <table role="presentation" cellpadding="0" cellspacing="0" class="btn">
                 <tr>
                   <td align="center" style="border-radius:9999px;background-color:#3f2d51;">
-                    <!-- Sustituye TU-PROYECTO por tu dominio de Vercel y TU_CLAVE_SECRETA por el valor de CLICK_SECRET. {{email}} es el token de personalización de Monday. -->
-                    <a href="https://mail-yugo-3-julio.vercel.app/api/interesado?email={{email}}&k=TU_CLAVE_SECRETA" target="_blank" style="display:inline-block;padding:16px 44px;font-size:16px;font-weight:bold;color:#FFFFFF;text-decoration:none;border-radius:9999px;font-family:Helvetica,Arial,sans-serif;">Estoy interesado</a>
+                    <!-- Sustituye TU_CLAVE_SECRETA por el valor de CLICK_SECRET en Vercel. {pulse.marketing_contact_email} es el token de Monday con el email del lead. -->
+                    <a href="https://mail-yugo-3-julio.vercel.app/api/interesado?email={pulse.marketing_contact_email}&k=TU_CLAVE_SECRETA" target="_blank" style="display:inline-block;padding:16px 44px;font-size:16px;font-weight:bold;color:#FFFFFF;text-decoration:none;border-radius:9999px;font-family:Helvetica,Arial,sans-serif;">Estoy interesado</a>
                   </td>
                 </tr>
               </table>

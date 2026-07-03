@@ -25,10 +25,13 @@ package.json                   → config del proyecto
    | `MONDAY_API_TOKEN` | ✅ | Token de la API de Monday (Perfil → Developers → My Access Tokens) |
    | `CLICK_SECRET` | Recomendada | Una clave inventada, ej. `yugo-2026-x7q2`. Debe coincidir con la del enlace del email |
    | `REDIRECT_URL` | Opcional | A dónde redirigir tras el click. Por defecto `/gracias.html`. Puedes poner directamente tu enlace de reserva de visita |
-   | `MONDAY_BOARD_ID` | Opcional | Por defecto `5098228821` |
-   | `MONDAY_STATUS_COLUMN_ID` | Opcional | ID de la columna de estado. Por defecto `status` (⚠️ verifícalo, ver abajo) |
-   | `MONDAY_EMAIL_COLUMN_ID` | Opcional | ID de la columna de email. Por defecto `email` (⚠️ verifícalo) |
-   | `MONDAY_STATUS_LABEL` | Opcional | Por defecto `Acción comercial` |
+   | `MONDAY_BOARD_ID` | Opcional | Por defecto `5098228821` (tablero "Leads") |
+   | `MONDAY_STATUS_COLUMN_ID` | Opcional | Por defecto `color_mm3qa08v` ("Estado Lead") ✅ verificado |
+   | `MONDAY_EMAIL_COLUMN_ID` | Opcional | Por defecto `email_mm3q9xk` ("E-mail") ✅ verificado |
+   | `MONDAY_STATUS_LABEL` | Opcional | Por defecto `Acción comercial` (ya existe como label) |
+
+   > Los IDs por defecto están verificados contra el tablero real, así que **solo necesitas
+   > `MONDAY_API_TOKEN` y `CLICK_SECRET`**. Las demás son opcionales.
 
 4. **Deploy.** Vercel te da una URL tipo `https://tu-proyecto.vercel.app`.
 
@@ -37,33 +40,22 @@ package.json                   → config del proyecto
 En `yugo-cartuja-admisiones.html`, el botón "Estoy interesado" apunta a:
 
 ```
-https://TU-PROYECTO.vercel.app/api/interesado?email={{email}}&k=TU_CLAVE_SECRETA
+https://mail-yugo-3-julio.vercel.app/api/interesado?email={pulse.marketing_contact_email}&k=TU_CLAVE_SECRETA
 ```
 
-- Cambia `TU-PROYECTO` por tu dominio real de Vercel.
 - Cambia `TU_CLAVE_SECRETA` por el valor de `CLICK_SECRET`.
-- `{{email}}` es el **token de personalización de Monday** (ajústalo al que uséis al enviar; también sirve `{{item_id}}` usando el parámetro `itemId=` en vez de `email=`).
+- `{pulse.marketing_contact_email}` es el token de Monday con el email del lead, y `{pulse.name}` (usado en el saludo) con su nombre.
 
-## ⚠️ Verificar los IDs de columna de Monday
+## IDs de columna de Monday (verificados)
 
-Los valores por defecto (`status`, `email`) pueden no coincidir con los reales del
-tablero. Para obtener los IDs correctos, en la API de Monday:
+Ya están fijados en `api/interesado.js`, no hace falta configurarlos:
 
-```graphql
-query {
-  boards(ids: 5098228821) {
-    columns { id title type }
-  }
-}
-```
-
-Copia el `id` de la columna de estado y de la de email a las variables de entorno.
-También asegúrate de que existe el label **"Acción comercial"** en la columna de
-estado (si no, el endpoint lo crea automáticamente).
+- Estado: `color_mm3qa08v` ("Estado Lead"), label objetivo **"Acción comercial"** (ya existe).
+- Email: `email_mm3q9xk` ("E-mail").
 
 ## Cómo funciona
 
 1. El lead pulsa "Estoy interesado" en el email.
-2. Vercel recibe `email` (o `itemId`) y la clave `k`.
-3. Si la clave es válida, busca el item en Monday y pone su estado en **Acción comercial**.
+2. Vercel recibe el email (`{pulse.marketing_contact_email}`) y la clave `k`.
+3. Si la clave es válida, busca el item por email en Monday y pone "Estado Lead" en **Acción comercial**.
 4. Redirige al lead a la página de gracias (o al enlace de visita).
