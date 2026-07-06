@@ -1,6 +1,6 @@
 // Endpoint invocado desde el botón "Estoy interesado" del email.
 // 1) Identifica al lead (por itemId o por email).
-// 2) Cambia su estado a "Acción comercial" en el tablero de Monday.
+// 2) Pone su estado en "Acción comercial" y la campaña en "Mailing Admisión 6/7/26".
 // 3) Redirige al lead a la página de gracias / reserva de visita.
 //
 // Nunca muestra error al usuario: pase lo que pase, redirige. Los fallos
@@ -46,21 +46,21 @@ async function findItemIdByEmail(boardId, emailColumnId, email) {
   return items[0]?.id || null;
 }
 
-// Cambia la columna de estado del item al label indicado.
-async function setStatus(boardId, itemId, columnId, label) {
+// Actualiza varias columnas del item en una sola operación (estado + campaña).
+// `values` es un objeto { columnId: valorSegunTipo }.
+async function updateLead(boardId, itemId, values) {
   const query = `
-    mutation ($boardId: ID!, $itemId: ID!, $columnId: String!, $value: String!) {
-      change_simple_column_value(
+    mutation ($boardId: ID!, $itemId: ID!, $values: JSON!) {
+      change_multiple_column_values(
         board_id: $boardId,
         item_id: $itemId,
-        column_id: $columnId,
-        value: $value,
+        column_values: $values,
         create_labels_if_missing: true
       ) {
         id
       }
     }`;
-  return mondayRequest(query, { boardId, itemId, columnId, value: label });
+  return mondayRequest(query, { boardId, itemId, values: JSON.stringify(values) });
 }
 
 export default async function handler(req, res) {
@@ -70,6 +70,8 @@ export default async function handler(req, res) {
     MONDAY_STATUS_COLUMN_ID = "color_mm3qa08v", // "Estado Lead"
     MONDAY_EMAIL_COLUMN_ID = "email_mm3q9xk", // "E-mail"
     MONDAY_STATUS_LABEL = "Acción comercial", // ya existe como label en la columna
+    MONDAY_CAMPAIGN_COLUMN_ID = "dropdown_mm50d5ca", // "Campaña" (dropdown)
+    MONDAY_CAMPAIGN_LABEL = "Mailing Admisión 6/7/26", // ya existe como opción del dropdown
 
     CLICK_SECRET,
     REDIRECT_URL = "/gracias.html",
@@ -96,8 +98,12 @@ export default async function handler(req, res) {
       return redirect();
     }
 
-    await setStatus(MONDAY_BOARD_ID, id, MONDAY_STATUS_COLUMN_ID, MONDAY_STATUS_LABEL);
-    console.log(`Lead ${id} marcado como "${MONDAY_STATUS_LABEL}".`);
+    const values = {
+      [MONDAY_STATUS_COLUMN_ID]: { label: MONDAY_STATUS_LABEL },
+      [MONDAY_CAMPAIGN_COLUMN_ID]: { labels: [MONDAY_CAMPAIGN_LABEL] },
+    };
+    await updateLead(MONDAY_BOARD_ID, id, values);
+    console.log(`Lead ${id}: estado "${MONDAY_STATUS_LABEL}", campaña "${MONDAY_CAMPAIGN_LABEL}".`);
   } catch (err) {
     console.error("Error actualizando Monday:", err);
   }
