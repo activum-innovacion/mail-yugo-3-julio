@@ -1,6 +1,6 @@
 // Endpoint invocado desde el botón "Estoy interesado" del email.
 // 1) Identifica al lead (por itemId o por email).
-// 2) Pone su estado en "Acción comercial" y la campaña en "Mailing Admisión 9/7/26".
+// 2) Pone su estado en "Acción comercial" y la campaña en "Mailing Admisión 17/7/26".
 // 3) Redirige al lead a la página de gracias / reserva de visita.
 //
 // Nunca muestra error al usuario: pase lo que pase, redirige. Los fallos
@@ -71,7 +71,7 @@ export default async function handler(req, res) {
     MONDAY_EMAIL_COLUMN_ID = "email_mm3q9xk", // "E-mail"
     MONDAY_STATUS_LABEL = "Acción comercial", // ya existe como label en la columna
     MONDAY_CAMPAIGN_COLUMN_ID = "dropdown_mm50d5ca", // "Campaña" (dropdown)
-    MONDAY_CAMPAIGN_LABEL = "Mailing Admisión 9/7/26", // se crea solo si no existe (create_labels_if_missing)
+    MONDAY_CAMPAIGN_LABEL = "Mailing Admisión 17/7/26", // se crea solo si no existe (create_labels_if_missing)
 
     CLICK_SECRET,
     REDIRECT_URL = "/gracias.html",
