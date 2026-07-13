@@ -1,12 +1,28 @@
-// Endpoint invocado desde el botón "Estoy interesado" del email.
+// Endpoint invocado desde el botón CTA de los emails.
 // 1) Identifica al lead (por itemId o por email).
-// 2) Pone su estado en "Acción comercial" y la campaña en "Mailing Admisión 17/7/26".
-// 3) Redirige al lead a la página de gracias / reserva de visita.
+// 2) Actualiza su estado y campaña según el parámetro `c` del enlace
+//    (sin `c` → mailing de admisión, estado "Acción comercial").
+//    Para la JPA (`c=jpa`), el parámetro `h` indica la franja horaria elegida:
+//    el lead pasa a "Visita agendada" y se rellena la fecha/hora de visita.
+// 3) Redirige al lead a la página de gracias correspondiente.
 //
 // Nunca muestra error al usuario: pase lo que pase, redirige. Los fallos
 // quedan registrados en los logs de Vercel para poder revisarlos.
 
 const MONDAY_API = "https://api.monday.com/v2";
+
+// Campañas seleccionables desde el enlace del email vía `c`. Se mapean aquí
+// (y no como texto libre en la URL) para que nadie pueda crear labels
+// arbitrarios en Monday. Un valor desconocido cae en la campaña por defecto.
+const CAMPAIGNS = {
+  jpa: {
+    label: "Mailing JPA 17/7/26",
+    status: "Visita Agendada", // así, con mayúscula: es el label exacto del tablero
+    redirect: "/gracias-jpa.html",
+    visitDate: "2026-07-17",
+    slots: { 1030: "10:30:00", 1200: "12:00:00", 1330: "13:30:00" },
+  },
+};
 
 async function mondayRequest(query, variables) {
   const res = await fetch(MONDAY_API, {
@@ -72,15 +88,29 @@ export default async function handler(req, res) {
     MONDAY_STATUS_LABEL = "Acción comercial", // ya existe como label en la columna
     MONDAY_CAMPAIGN_COLUMN_ID = "dropdown_mm50d5ca", // "Campaña" (dropdown)
     MONDAY_CAMPAIGN_LABEL = "Mailing Admisión 17/7/26", // se crea solo si no existe (create_labels_if_missing)
+    MONDAY_VISIT_COLUMN_ID = "date_mm3qtz5n", // "Fecha y hora inicio visita" (verificado vía API)
 
     CLICK_SECRET,
     REDIRECT_URL = "/gracias.html",
   } = process.env;
 
-  const { itemId, email, k } = req.query;
+  const { itemId, email, k, c, h } = req.query;
 
-  // Redirige siempre para no romper la experiencia del lead.
-  const redirect = () => res.redirect(302, REDIRECT_URL);
+  const campaign =
+    typeof c === "string" && Object.hasOwn(CAMPAIGNS, c)
+      ? CAMPAIGNS[c]
+      : { label: MONDAY_CAMPAIGN_LABEL, status: MONDAY_STATUS_LABEL, redirect: REDIRECT_URL };
+
+  // Franja horaria elegida (solo en campañas con visita, p. ej. la JPA).
+  const slotTime =
+    campaign.slots && typeof h === "string" && Object.hasOwn(campaign.slots, h)
+      ? campaign.slots[h]
+      : null;
+
+  // Redirige siempre para no romper la experiencia del lead. La página de
+  // gracias de la JPA muestra la franja elegida si va en la query.
+  const redirect = () =>
+    res.redirect(302, slotTime ? `${campaign.redirect}?h=${h}` : campaign.redirect);
 
   try {
     // Clave compartida: evita que cualquiera dispare el endpoint a lo bruto.
@@ -99,11 +129,21 @@ export default async function handler(req, res) {
     }
 
     const values = {
-      [MONDAY_STATUS_COLUMN_ID]: { label: MONDAY_STATUS_LABEL },
-      [MONDAY_CAMPAIGN_COLUMN_ID]: { labels: [MONDAY_CAMPAIGN_LABEL] },
+      [MONDAY_STATUS_COLUMN_ID]: { label: campaign.status },
+      [MONDAY_CAMPAIGN_COLUMN_ID]: { labels: [campaign.label] },
     };
+    if (slotTime) {
+      if (MONDAY_VISIT_COLUMN_ID) {
+        values[MONDAY_VISIT_COLUMN_ID] = { date: campaign.visitDate, time: slotTime };
+      } else {
+        console.warn("MONDAY_VISIT_COLUMN_ID no configurado: la franja elegida no se guarda en Monday.");
+      }
+    }
     await updateLead(MONDAY_BOARD_ID, id, values);
-    console.log(`Lead ${id}: estado "${MONDAY_STATUS_LABEL}", campaña "${MONDAY_CAMPAIGN_LABEL}".`);
+    console.log(
+      `Lead ${id}: estado "${campaign.status}", campaña "${campaign.label}"` +
+        (slotTime ? `, visita ${campaign.visitDate} ${slotTime}.` : ".")
+    );
   } catch (err) {
     console.error("Error actualizando Monday:", err);
   }

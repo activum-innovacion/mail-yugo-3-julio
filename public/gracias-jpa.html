@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>¡Gracias! · Jornada de Puertas Abiertas · Yugo La Cartuja</title>
+  <style>
+    body{margin:0;background-color:#F4F1F7;font-family:Helvetica,Arial,sans-serif;color:#3A3247;}
+    .wrap{max-width:560px;margin:0 auto;padding:48px 16px;}
+    .card{background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 8px 30px rgba(63,45,81,.08);}
+    .head{background:#3f2d51;padding:24px 40px;}
+    .head img{display:block;height:auto;border:0;}
+    .body{padding:44px 40px 40px;text-align:center;}
+    .check{width:72px;height:72px;border-radius:50%;background:#F4F1F7;display:inline-flex;align-items:center;justify-content:center;font-size:36px;margin:0 0 20px;}
+    h1{margin:0 0 14px;font-size:28px;line-height:1.25;color:#3f2d51;}
+    p{margin:0 0 18px;font-size:16px;line-height:1.7;color:#3A3247;}
+    .muted{color:#6B6378;font-size:14px;}
+    .slots{display:flex;justify-content:center;gap:12px;margin:0 0 22px;}
+    .slot{background:#F4F1F7;border-radius:10px;padding:12px 20px;font-size:20px;font-weight:bold;color:#3f2d51;}
+    .slot.sel{background:#3f2d51;color:#fff;}
+    .foot{background:#3f2d51;padding:20px 40px;}
+    .foot p{margin:0;font-size:12px;line-height:1.6;color:#B7AECB;}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <div class="head">
+        <img src="https://raw.githubusercontent.com/activum-innovacion/mail-yugo-3-julio/main/yugo-logo-white.png" alt="Yugo" width="110">
+      </div>
+      <div class="body">
+        <div class="check">✅</div>
+        <h1>¡Gracias! Tu visita está agendada</h1>
+        <p id="msg">Un asesor de <strong>Yugo La Cartuja</strong> te contactará muy pronto para confirmar tu visita en la <strong>Jornada de Puertas Abiertas</strong> del <strong>viernes 17 de julio</strong>.</p>
+        <div class="slots">
+          <div class="slot" data-h="1030">10:30</div>
+          <div class="slot" data-h="1200">12:00</div>
+          <div class="slot" data-h="1330">13:30</div>
+        </div>
+        <p class="muted">Si al final no puedes venir en persona, también te enseñamos la residencia por videollamada: tu asesor lo organiza contigo.</p>
+      </div>
+      <div class="foot">
+        <p>Yugo La Cartuja · Residencia de estudiantes en Sevilla · Tel. +34 854 564 369</p>
+      </div>
+    </div>
+  </div>
+  <script>
+    // Si el webhook añade ?h=1030|1200|1330, resalta la franja elegida.
+    var SLOTS = { "1030": "10:30", "1200": "12:00", "1330": "13:30" };
+    var h = new URLSearchParams(location.search).get("h");
+    if (h && Object.prototype.hasOwnProperty.call(SLOTS, h)) {
+      document.querySelectorAll(".slot").forEach(function (el) {
+        el.classList.toggle("sel", el.getAttribute("data-h") === h);
+      });
+      document.getElementById("msg").innerHTML =
+        "Has elegido la franja de las <strong>" + SLOTS[h] + "</strong> del <strong>viernes 17 de julio</strong>. " +
+        "Un asesor de <strong>Yugo La Cartuja</strong> te contactará muy pronto para confirmar tu visita.";
+    }
+  </script>
+</body>
+</html>
