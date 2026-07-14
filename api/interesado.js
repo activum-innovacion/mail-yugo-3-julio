@@ -20,7 +20,9 @@ const CAMPAIGNS = {
     status: "Visita Agendada", // así, con mayúscula: es el label exacto del tablero
     redirect: "/gracias-jpa.html",
     visitDate: "2026-07-17",
-    slots: { 1030: "10:30:00", 1200: "12:00:00", 1330: "13:30:00" },
+    // Monday interpreta la hora en UTC. Estas son las franjas de 10:30,
+    // 12:00 y 13:30 hora de Sevilla (CEST, UTC+2, vigente el 17/7/2026).
+    slots: { 1030: "08:30:00", 1200: "10:00:00", 1330: "11:30:00" },
   },
 };
 
