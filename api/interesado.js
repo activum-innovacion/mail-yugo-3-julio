@@ -23,6 +23,10 @@ const CAMPAIGNS = {
     // Monday interpreta la hora en UTC. Estas son las franjas de 10:30,
     // 12:00 y 13:30 hora de Sevilla (CEST, UTC+2, vigente el 17/7/2026).
     slots: { 1030: "08:30:00", 1200: "10:00:00", 1330: "11:30:00" },
+    // Sobrescribe el origen original del lead (TikTok, Google…): decidido así
+    // para atribuir a la JPA los leads que reservan visita desde este mail.
+    originColumnId: "color_mm3qd8bq",
+    originLabel: "JPA",
     // "Ubicación visita" → Presencial se envía en una mutación aparte y en
     // último lugar: su cambio dispara un automatismo en Monday que necesita
     // el resto de columnas ya rellenas.
@@ -139,6 +143,9 @@ export default async function handler(req, res) {
       [MONDAY_STATUS_COLUMN_ID]: { label: campaign.status },
       [MONDAY_CAMPAIGN_COLUMN_ID]: { labels: [campaign.label] },
     };
+    if (campaign.originColumnId) {
+      values[campaign.originColumnId] = { label: campaign.originLabel };
+    }
     if (slotTime) {
       if (MONDAY_VISIT_COLUMN_ID) {
         values[MONDAY_VISIT_COLUMN_ID] = { date: campaign.visitDate, time: slotTime };
