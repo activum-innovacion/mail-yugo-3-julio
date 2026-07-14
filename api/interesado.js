@@ -23,6 +23,11 @@ const CAMPAIGNS = {
     // Monday interpreta la hora en UTC. Estas son las franjas de 10:30,
     // 12:00 y 13:30 hora de Sevilla (CEST, UTC+2, vigente el 17/7/2026).
     slots: { 1030: "08:30:00", 1200: "10:00:00", 1330: "11:30:00" },
+    // "Ubicación visita" → Presencial se envía en una mutación aparte y en
+    // último lugar: su cambio dispara un automatismo en Monday que necesita
+    // el resto de columnas ya rellenas.
+    locationColumnId: "color_mm3qyqsn",
+    locationLabel: "Presencial",
   },
 };
 
@@ -142,9 +147,14 @@ export default async function handler(req, res) {
       }
     }
     await updateLead(MONDAY_BOARD_ID, id, values);
+    if (slotTime && campaign.locationColumnId) {
+      await updateLead(MONDAY_BOARD_ID, id, {
+        [campaign.locationColumnId]: { label: campaign.locationLabel },
+      });
+    }
     console.log(
       `Lead ${id}: estado "${campaign.status}", campaña "${campaign.label}"` +
-        (slotTime ? `, visita ${campaign.visitDate} ${slotTime}.` : ".")
+        (slotTime ? `, visita ${campaign.visitDate} ${slotTime} (${campaign.locationLabel}).` : ".")
     );
   } catch (err) {
     console.error("Error actualizando Monday:", err);
